@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Quiz Challenge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        #quiz-container {
+            background: white;
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px black;
+            margin-top: 50px;
+            color: black;
+        }
+        .option {
+            display: block;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .option:nth-child(odd) { background: #ffd700; }
+        .option:nth-child(even) { background: #ff4500; color: white; }
+        .option:hover {
+            background: green !important;
+            color: white;
+        }
+        .correct {
+            background: green !important;
+            color: white;
+        }
+        .wrong {
+            background: red !important;
+            color: white;
+        }
+        #question-box, #options-box {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+        #question-box.show, #options-box.show {
+            opacity: 1;
+        }
+        #level-selection {
+            display: block;
+        }
+        #quiz-container.hide {
+            display: none;
+        }
+        button {
+            background: #008CBA;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005f73; 
+        }  
+        footer {  
+            margin-top: 20px;  
+            background-color: #ff6347;  
+            color: white;  
+            padding: 15px;  
+            border-radius: 5px;  
+        }  
+        footer p {  
+            margin: 5px 0;  
+        }  
+        footer a {  
+            color: white;  
+            text-decoration: none;  
+        }  
+        #timer {  
+            font-size: 1.2rem;  
+            color: #ff6347;  
+        }  
+        #next-btn {  
+            background: #ff6347;  
+            color: white;  
+            padding: 10px 20px;  
+            border: none;  
+            cursor: pointer;  
+            border-radius: 5px;  
+            margin-top: 20px;  
+            display: none;  
+        }  
+        #next-btn:hover {  
+            background: #e53e3e;  
+        }  
+    </style>  
+</head>  
+<body>  <div id="quiz-container">  
+    <h1>🎓 Ultimate Quiz Challenge 🎓</h1>  
+    <h3 id="level-title">Welcome! Select a level to start.</h3>  
+    <div id="level-selection"></div>  
+    <div id="question-box"></div>  
+    <div id="options-box"></div>  
+    <p id="timer"></p>  
+    <button id="next-btn" onclick="nextQuestion()">Next Question</button>  
+</div>  
+
+<script>  
+    const quizData = {  
+        "Primary 1": [  
+            {question: "What is 2 + 2?", options: ["3", "4", "5"], answer: 1},  
+            {question: "What is 5 - 3?", options: ["1", "2", "3"], answer: 1},  
+            {question: "What is 3 + 7?", options: ["9", "10", "11"], answer: 1},  
+            {question: "What is 6 - 4?", options: ["1", "2", "3"], answer: 1},  
+            {question: "What is 8 ÷ 2?", options: ["3", "4", "5"], answer: 1},  
+            {question: "What is 10 + 5?", options: ["13", "15", "17"], answer: 1},  
+            {question: "What is 12 - 8?", options: ["3", "4", "5"], answer: 1},  
+            {question: "What is 7 + 3?", options: ["10", "11", "12"], answer: 0},  
+        ],  
+        "Primary 6": [  
+            {question: "What is the square root of 81?", options: ["8", "9", "10"], answer: 1},  
+            {question: "What is 12 × 12?", options: ["124", "144", "134"], answer: 1},  
+            {question: "What is 5²?", options: ["10", "25", "50"], answer: 1},  
+            {question: "Who discovered gravity?", options: ["Newton", "Einstein", "Galileo"], answer: 0},  
+            {question: "What is the perimeter of a rectangle with length 5 and width 3?", options: ["8", "16", "18"], answer: 1},  
+            {question: "What is 3 × 4?", options: ["10", "12", "14"], answer: 1},  
+            {question: "What is the area of a square with side length 6?", options: ["36", "24", "18"], answer: 0},  
+        ],  
+        "High School": [  
+            {question: "What is the capital of France?", options: ["Paris", "Berlin", "Madrid"], answer: 0},  
+            {question: "What is the chemical symbol for water?", options: ["H2", "O2", "H2O"], answer: 2},  
+            {question: "What is the largest planet in our solar system?", options: ["Earth", "Mars", "Jupiter"], answer: 2},  
+            {question: "Who wrote 'Romeo and Juliet'?", options: ["Shakespeare", "Dickens", "Austen"], answer: 0},  
+            {question: "What is the formula for speed?", options: ["Distance × Time", "Distance ÷ Time", "Time ÷ Distance"], answer: 1},  
+            {question: "Which of these is a prime number?", options: ["4", "7", "9"], answer: 1},  
+            {question: "What is the square root of 256?", options: ["12", "14", "16"], answer: 2},  
+        ],  
+        "University": [  
+            {question: "What is the formula for acceleration?", options: ["a = v/t", "a = f/m", "a = m/v"], answer: 0},  
+            {question: "Who proposed the theory of relativity?", options: ["Newton", "Einstein", "Galileo"], answer: 1},  
+            {question: "What is the value of Planck's constant?", options: ["6.626 × 10^-34", "9.81", "3.1416"], answer: 0},  
+            {question: "What is the chemical formula for methane?", options: ["CH4", "CO2", "O2"], answer: 0},  
+            {question: "What is the derivative of sin(x)?", options: ["cos(x)", "sin(x)", "tan(x)"], answer: 0},  
+            {question: "What is the integral of x²?", options: ["x³/3 + C", "x²/2 + C", "x + C"], answer: 0},  
+            {question: "Who developed the periodic table?", options: ["Mendeleev", "Einstein", "Bohr"], answer: 0},  
+        ]  
+    };  
+
+    let currentLevel = "";  
+    let currentQuestionIndex = 0;  
+    let score = 0;  
+    let timer;  
+    let timeLeft = 15;  
+
+    function showLevels() {  
+        let levelSelectionHTML = Object.keys(quizData).map(level =>  
+            `<div class="option" onclick="startQuiz('${level}')">${level}</div>`).join("");  
+        document.getElementById("level-selection").innerHTML = levelSelectionHTML;  
+    }  
+
+    function startQuiz(level) {  
+        currentLevel = level;  
+        currentQuestionIndex = 0;  
+        score = 0;  
+        document.getElementById("level-title").innerText = `🏆 Starting ${level} Level Quiz...`;  
+        document.getElementById("level-selection").style.display = "none";  
+        document.getElementById("quiz-container").classList.remove("hide");  
+        loadQuestion();  
+    }  
+
+    function loadQuestion() {  
+        clearInterval(timer);  
+        timeLeft = 15;  
+        document.getElementById("timer").innerText = `⏳ Time remaining: ${timeLeft}s`;  
+
+        if (currentQuestionIndex >= quizData[currentLevel].length) {  
+            document.getElementById("question-box").innerHTML = `<h2>🎉 Quiz Completed!</h2>`;  
+            document.getElementById("options-box").innerHTML = `<p>Your Score: ${score}/${quizData[currentLevel].length}</p>`;  
+            document.getElementById("next-btn").style.display = "none";  
+            return;  
+        }  
+
+        let questionData = quizData[currentLevel][currentQuestionIndex];  
+        document.getElementById("question-box").innerHTML = `<h3>${questionData.question}</h3>`;  
+        document.getElementById("options-box").innerHTML = questionData.options.map((option, index) =>  
+            `<div class="option" onclick="selectAnswer(${index})">${option}</div>`).join("");  
+
+        document.getElementById("question-box").classList.add("show");  
+        document.getElementById("options-box").classList.add("show");  
+
+        timer = setInterval(() => {  
+            timeLeft--;  
+            document.getElementById("timer").innerText = `⏳ Time remaining: ${timeLeft}s`;  
+            if (timeLeft === 0) {  
+                clearInterval(timer);  
+                document.getElementById("question-box").innerHTML += `<p>⏰ Time's up! Moving to the next question...</p>`;  
+                document.getElementById("next-btn").style.display = "block";  
+            }  
+        }, 1000);  
+    }  
+
+    function selectAnswer(selectedIndex) {  
+        clearInterval(timer);  
+        let correctIndex = quizData[currentLevel][currentQuestionIndex].answer;  
+        let options = document.getElementsByClassName("option");  
+
+        if (selectedIndex === correctIndex) {  
+            options[selectedIndex].classList.add("correct");  
+            score++;  
+        } else {  
+            options[selectedIndex].classList.add("wrong");  
+            options[correctIndex].classList.add("correct");  
+        }  
+
+        setTimeout(() => {  
+            document.getElementById("next-btn").style.display = "block";  
+        }, 1000);  
+    }  
+
+    function nextQuestion() {  
+        currentQuestionIndex++;  
+        document.getElementById("next-btn").style.display = "none";  
+        loadQuestion();  
+    }  
+
+    window.onload = showLevels;  
+</script>  
+
+<footer style="background: linear-gradient(to right, #ff6347, #ffb6c1, #ffeb3b, #4caf50, #2196f3, #9c27b0); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+    <p style="font-size: 1.5rem; font-weight: bold;">💡 <b>DEVELOPED BY: MILTON GREATNESS</b></p>
+    <p style="font-size: 1.2rem;">📱 WhatsApp: 
+        <a href="https://wa.me/23288326615" target="_blank" rel="noopener noreferrer" 
+           style="display: inline-block; background-color: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="height: 20px; vertical-align: middle; margin-right: 5px;">
+            CHAT WITH ME
+        </a>
+    </p>
+    <p style="font-size: 1.2rem;">📧 Email: 
+        <a href="mailto:greatnessmiltonsahr@gmail.com" target="_blank" rel="noopener noreferrer" 
+           style="display: inline-block; background-color: #ff6347; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" alt="Email" style="height: 20px; vertical-align: middle; margin-right: 5px;">
+            EMAIL ME
+        </a>
+    </p>
+    <p style="font-size: 1rem;">🌍 Stay Connected & Follow the Journey!</p>
+</footer>
+
+</body>  
+</html>  
+𝑷𝑳𝑬𝑨𝑺𝑬 𝑺𝑯𝑨𝑹𝑬 𝒀𝑶𝑼𝑹 𝑰𝑫𝑬𝑨𝑺 💡𝑾𝑰𝑻𝑯 𝑴𝑰𝑳𝑻𝑶𝑵 𝑮𝑹𝑬𝑨𝑻𝑵𝑬𝑺𝑺 𝑨𝑺 𝑯𝑬'𝑺 𝑱𝑼𝑺𝑻 𝑨 𝑩𝑬𝑮𝑰𝑵𝑵𝑬𝑹
+
+
